@@ -1,0 +1,85 @@
+W : constants.go:17 (lib.init.0)             - Couldn't parse CONN_TIMEOUT, using default value:  10m0s
+Initializing network for thread:  3
+Initializing network for thread:  1
+Opening socket on:  0.0.0.0:8021
+Initializing network for thread:  0
+Opening socket on:  0.0.0.0:8023
+Initializing network for thread:  2
+Opening socket on:  0.0.0.0:8022
+Opening socket on:  0.0.0.0:8020
+W : constants.go:17 (lib.init.0)             - Couldn't parse CONN_TIMEOUT, using default value:  10m0s
+Initializing network for thread:  3
+Initializing network for thread:  1
+Initializing network for thread:  2
+Initializing network for thread:  0
+Successfully connected to 127.0.0.1:8022
+Connected to socket, listening to party 0
+Successfully connected to 127.0.0.1:8020
+Successfully connected to 127.0.0.1:8021
+Connected to socket, listening to party 0
+Opening socket on:  0.0.0.0:8061
+Successfully opened channel at port 8020
+Successfully connected to 127.0.0.1:8023
+Check port: opened and listening to party 1
+Connected to socket, listening to party 0
+Opening socket on:  0.0.0.0:8040
+Opening socket on:  0.0.0.0:8063
+Connected to socket, listening to party 0
+Successfully opened channel at port 8021
+Opening socket on:  0.0.0.0:8060
+Check port: opened and listening to party 1
+Opening socket on:  0.0.0.0:8062
+Opening socket on:  0.0.0.0:8041
+Successfully opened channel at port 8022
+Check port: opened and listening to party 1
+Opening socket on:  0.0.0.0:8042
+Successfully opened channel at port 8023
+Check port: opened and listening to party 1
+Opening socket on:  0.0.0.0:8043
+W : constants.go:17 (lib.init.0)             - Couldn't parse CONN_TIMEOUT, using default value:  10m0s
+Initializing network for thread:  3
+Initializing network for thread:  1
+Initializing network for thread:  2
+Initializing network for thread:  0
+Successfully connected to 127.0.0.1:8041
+Successfully connected to 127.0.0.1:8043
+Connected to socket, listening to party 0
+Connected to socket, listening to party 0
+Successfully connected to 127.0.0.1:8042
+Connected to socket, listening to party 0
+Successfully connected to 127.0.0.1:8040
+Successfully opened channel at port 8041
+Check port: opened and listening to party 2
+Successfully opened channel at port 8042
+Connected to socket, listening to party 0
+Check port: opened and listening to party 2
+Network for thread 2 complete. Network for thread 1 complete. Successfully connected to 127.0.0.1:8063
+Successfully opened channel at port 8043
+Connected to socket, listening to party 1
+Check port: opened and listening to party 2
+Network for thread 3 complete. Network for thread 3 complete. Successfully opened channel at port 8040
+Successfully connected to 127.0.0.1:8062
+Check port: opened and listening to party 2
+Connected to socket, listening to party 1
+Network for thread 2 complete. Network for thread 0 complete. Successfully connected to 127.0.0.1:8061
+Connected to socket, listening to party 1
+Network for thread 1 complete. Successfully opened channel at port 8061
+Check port: opened and listening to party 2
+Successfully connected to 127.0.0.1:8060
+Network for thread 1 complete. Connected to socket, listening to party 1
+Network for thread 0 complete. Successfully opened channel at port 8063
+Check port: opened and listening to party 2
+Network for thread 3 complete. Successfully opened channel at port 8060
+Check port: opened and listening to party 2
+Network for thread 0 complete. Successfully opened channel at port 8062
+Check port: opened and listening to party 2
+Network for thread 2 complete. 1!: gwas.go:193 (gwas.InitializeGWASProtocol) - MPC parameters: bit length 256, data bits 60, frac bits 30
+1!: gwas.go:193 (gwas.InitializeGWASProtocol) - MPC parameters: bit length 256, data bits 60, frac bits 30
+1!: gwas.go:193 (gwas.InitializeGWASProtocol) - MPC parameters: bit length 256, data bits 60, frac bits 30
+1!: gwas.go:265 (gwas.InitializeGWASProtocol) - 2025-03-28T12:25:34-04:00 First few SNP positions: [1000010000 1000020000 1000030000 1000040000 1000050000]
+1!: gwas.go:265 (gwas.InitializeGWASProtocol) - 2025-03-28T12:25:34-04:00 First few SNP positions: [1000010000 1000020000 1000030000 1000040000 1000050000]
+Timer started at: 2025-03-28 12:25:34.357247 -0400 EDT m=+0.600671126
+SSTrigVec computation took: 2562047h47m16.854775807s
+Average Relative Error: 0.000004341291
+Mean Squared Error (MSE): 0.000000000001
+Mean Absolute Error (MAE): 0.000000618559

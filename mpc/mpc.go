@@ -91,6 +91,17 @@ type TypedKey struct {
 	typeId uint8
 }
 
+/*
+Makes a pascal matrix
+[
+
+	[1, 0, 0, 0],
+	[1, 1, 0, 0],
+	[1, 2, 1, 0],
+	[1, 3, 3, 1]
+
+]
+*/
 func pascalmat(rtype mpc_core.RElem, pow int) mpc_core.RMat {
 	res := make(mpc_core.RMat, pow+1)
 
@@ -109,7 +120,7 @@ func pascalmat(rtype mpc_core.RElem, pow int) mpc_core.RMat {
 	return res
 }
 
-//GetPascalMat retrieves the pascal matrix associated with the given power
+// GetPascalMat retrieves the pascal matrix associated with the given power
 func (mpcObj *MPC) GetPascalMatrix(rtype mpc_core.RElem, pow int) mpc_core.RMat {
 	k := TypedKey{pow, rtype.TypeID()}
 
@@ -389,6 +400,7 @@ func (mpcObj *MPC) RevealSymVec(a mpc_core.RVec) mpc_core.RVec {
 	return ar[0]
 }
 
+// adds all the shares up basically
 func (mpcObj *MPC) RevealSymMat(a mpc_core.RMat) mpc_core.RMat {
 	pid := mpcObj.Network.pid
 	if pid == 0 {
@@ -523,6 +535,7 @@ func (mpcObj *MPC) Powers(a mpc_core.RVec, pow int) mpc_core.RMat {
 	return b
 }
 
+// is a secret shared?
 func (mpcObj *MPC) EvaluatePoly(a mpc_core.RVec, coeff mpc_core.RMat) mpc_core.RMat {
 	pid := mpcObj.Network.pid
 	n := len(a)
@@ -1045,7 +1058,7 @@ func (mpcObj *MPC) NormalizerEvenExp2N(x mpc_core.RVec, k int) (mpc_core.RVec, m
 }
 
 // Returns power-of-two multipliers b and sqrt(b) (for each a)
-// where the bit length of a * b becomes k or k-1.
+// where the bit lengtof a * b becomes k or k-1.
 // Requires input a to be strictly positive and k to be even
 // For statistical security, also requires ring modulus to be at least
 // 30 bits longer than the maximum data bit length k
@@ -2859,4 +2872,199 @@ func (mpcObj *MPC) MatrixInverseSymPos(ASymPosDef mpc_core.RMat) (AInv, AInvSqrt
 	AInv = mpcObj.TruncMat(AInv, mpcObj.GetDataBits(), mpcObj.GetFracBits())
 
 	return
+}
+
+func (mpcObj *MPC) GeneratePowersNaive(a mpc_core.RElem, n int) mpc_core.RVec {
+	rtype := mpcObj.GetRType()
+	fracBits := mpcObj.GetFracBits()
+	dataBits := mpcObj.GetDataBits()
+
+	// Initialize the result array with size `n`
+	powers := mpc_core.InitRVec(rtype.Zero(), int(n)+1)
+
+	// Start with a^1
+	powers[1] = a
+
+	// Calculate subsequent powers of `a`
+	for i := 2; i <= n; i++ {
+		powers[i] = mpcObj.SSMultElem(powers[i-1], a)
+		powers[i] = mpcObj.Trunc(powers[i], dataBits, fracBits)
+	}
+
+	return powers
+}
+
+func (mpcObj *MPC) GeneratePowers(a mpc_core.RElem, n int) mpc_core.RVec {
+	// Initialize a slice to store computed powers.
+	rtype := mpcObj.GetRType()
+	fracBits := mpcObj.GetFracBits()
+	dataBits := mpcObj.GetDataBits()
+
+	// Index 0 is unused for simplicity, so the slice has a length of n+1.
+	powers := mpc_core.InitRVec(rtype.Zero(), n+1)
+	powers[1] = a
+
+	currentMax := 1 // Current maximum power computed.
+
+	for currentMax < n {
+		nextMax := 2 * currentMax
+		if nextMax > n {
+			nextMax = n
+		}
+
+		// Extract the slice [x^1, x^2, ..., x^currentMax]
+		vec := powers[1 : currentMax+1]
+
+		// Multiply vec by x^currentMax using vectorTimesScalar
+		newPowers := mpcObj.SSMultElemVecScalar(vec, powers[currentMax])
+		newPowers = mpcObj.TruncVec(newPowers, dataBits, fracBits)
+
+		// Determine how many new powers to compute
+		newPowersCount := nextMax - currentMax
+
+		// Assign newPowers to powers[currentMax+1 : nextMax+1]
+		for i := 0; i < newPowersCount; i++ {
+			powers[currentMax+1+i] = newPowers[i]
+			// fun := mpcObj.RevealSym(newPowers[i]).Float64(fracBits)
+			// fmt.Printf("Computed x^%d = x^%d * x^%d = %.6f\n", currentMax+1+i, currentMax, i+1, fun)
+		}
+
+		currentMax = nextMax // Update the current maximum power.
+	}
+
+	return powers
+}
+
+func (mpcObj *MPC) EvaluatePolynomial(coefficients []float64, numbers mpc_core.RVec) mpc_core.RVec {
+	rtype := mpcObj.GetRType()
+	fracBits := mpcObj.GetFracBits()
+	// dataBits := mpcObj.GetDataBits()
+	n := len(coefficients) - 1
+	m := len(numbers)
+
+	// Convert coefficients to RVec (not secret-shared, but plain)
+	coefficientsVec := mpc_core.FloatToRVec(rtype, coefficients, fracBits)
+
+	results := mpc_core.InitRVec(rtype.Zero(), m)
+
+	for i := 0; i < m; i++ {
+		// Generate powers of the current number starting from a^1
+		// a^1, a^2, ... a^(n-1)
+		powers := mpcObj.GeneratePowers(numbers[i], n)
+
+		// Initialize the polynomial result with the constant term (a^0 * coefficient[0])
+		polynomial := rtype.Zero()
+
+		// Loop through and multiply powers by coefficients (starting from coefficient[1] and a^1)
+		// Loop through coefficients and corresponding powers to compute the polynomial
+		for j := 1; j <= n; j++ {
+			// Multiply a^j by coefficient[j]
+			term := powers[j].Mul(coefficientsVec[j])
+
+			// Add the term to the polynomial
+			polynomial = polynomial.Add(term)
+
+			// Optional: Debugging output (can be removed in production)
+			// fmt.Printf("Computed term a^%d * coeff[%d] = %v * %v = %v\n", j, j, powers[j], coefficientsVec[j], term)
+		}
+
+		// Store the result
+		results[i] = polynomial
+	}
+
+	return results
+}
+
+func f(x float64) float64 {
+	return 2 * (x/math.Pi - math.Floor(x/math.Pi+0.5))
+}
+
+// Everything below this only works with LElem2N
+
+func (mpcObj *MPC) PrecomputeMultiples(x mpc_core.RElem, N int) (mpc_core.RVec, mpc_core.RVec) {
+	rtype := mpc_core.LElem2N(0)
+	// fmt.Printf("rtype: %T\n", rtype)
+
+	cos_nx := mpc_core.InitRVec(rtype.Zero(), int(N))
+	sin_nx := mpc_core.InitRVec(rtype.Zero(), int(N))
+
+	sin_nx[0], cos_nx[0] = mpcObj.SSTrigElem(x)
+
+	for n := 2; n <= N; n += 1 {
+		n_RElem := rtype.FromInt(n)
+
+		nx := (n_RElem).Mul(x)
+		sin_nx[int(n)-1], cos_nx[int(n)-1] = mpcObj.SSTrigElem(nx)
+	}
+	return sin_nx, cos_nx
+}
+
+func trapz(y []float64, x []float64) float64 {
+	sum := 0.0
+	for i := 1; i < len(y); i++ {
+		sum += (y[i] + y[i-1]) * (x[i] - x[i-1]) / 2
+	}
+	return sum
+}
+
+func integrate(f func(float64) float64) float64 {
+	x := make([]float64, 1000)
+	y := make([]float64, 1000)
+	for i := 0; i < 1000; i++ {
+		x[i] = -math.Pi + 2*math.Pi*float64(i)/999
+		y[i] = f(x[i])
+	}
+	return trapz(y, x) / math.Pi
+}
+
+func a0() float64 {
+	return integrate(f) / 2
+}
+
+func an(n int) float64 {
+	cosineComponent := func(x float64) float64 {
+		return f(x) * math.Cos(float64(n)*x)
+	}
+	return integrate(cosineComponent)
+}
+
+func bn(n int) float64 {
+	sineComponent := func(x float64) float64 {
+		return f(x) * math.Sin(float64(n)*x)
+	}
+	return integrate(sineComponent)
+}
+
+func (mpcObj *MPC) FourierSeries(sin_nx mpc_core.RVec, cos_nx mpc_core.RVec, N int) mpc_core.RElem {
+	rtype := mpc_core.LElem256Zero
+	fracBits := mpcObj.GetFracBits()
+
+	result := rtype.FromFloat64(a0(), fracBits)
+	for n := 1; n <= N; n++ {
+		anRElem := rtype.FromFloat64(an(n), fracBits)
+		bnRElem := rtype.FromFloat64(bn(n), fracBits)
+
+		anRElem = anRElem.Mul(cos_nx[n-1])
+		bnRElem = bnRElem.Mul(sin_nx[n-1])
+
+		result = result.Add(anRElem)
+		result = result.Add(bnRElem)
+	}
+	return result
+}
+
+func (mpcObj *MPC) ComputeFourierSeriesForVec(a mpc_core.RVec, N int) []mpc_core.RElem {
+	// Initialize the output slice to store the results
+	resultVec := make([]mpc_core.RElem, len(a))
+
+	// Iterate over each RElem in the input vector
+	for i, relem := range a {
+		// Compute sin_nx and cos_nx for this specific relem
+		sin_nx, cos_nx := mpcObj.PrecomputeMultiples(relem, N)
+
+		// Compute the Fourier series for this relem using the computed sin_nx and cos_nx
+		resultVec[i] = mpcObj.FourierSeries(sin_nx, cos_nx, N)
+	}
+
+	return resultVec
 }

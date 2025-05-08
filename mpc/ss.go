@@ -1,7 +1,9 @@
 package mpc
 
 import (
+	"fmt"
 	"math/big"
+	"time"
 
 	mpc_core "github.com/hhcho/mpc-core"
 	"github.com/ldsec/lattigo/v2/utils"
@@ -17,6 +19,138 @@ import (
 	"github.com/ldsec/lattigo/v2/ckks"
 	//"math/bits"
 )
+
+func (mpcObj *MPC) SSTrigElem(a mpc_core.RElem) (mpc_core.RElem, mpc_core.RElem) {
+	ar, am := mpcObj.BeaverPartition(a)
+	sin, cos := mpcObj.BeaverSinCos(ar, am)
+	return sin, cos
+}
+
+func (mpcObj *MPC) SSSigmoidVec(a mpc_core.RVec) mpc_core.RVec {
+	ar, am := mpcObj.BeaverPartitionVec(a)
+	top := mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+	bottom := mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+	for i := range top {
+		top[i], bottom[i] = mpcObj.BeaverSigmoid(ar[i], am[i])
+	}
+	res := mpcObj.Divide(top, bottom, false)
+	return mpcObj.BeaverReconstructVec(res)
+}
+
+// func (mpcObj *MPC) SSTrigVec(a mpc_core.RVec) (mpc_core.RVec, mpc_core.RVec) {
+// 	ar, am := mpcObj.BeaverPartitionVec(a)
+// 	sin := mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+// 	cos := mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+// 	for i := range sin {
+// 		sin[i], cos[i] = mpcObj.BeaverSinCos(ar[i], am[i])
+// 	}
+// 	return sin, cos
+// }
+
+func (mpcObj *MPC) SSTrigVec(a mpc_core.RVec) (mpc_core.RVec, mpc_core.RVec) {
+	// Partition the vector into ar (the masked part) and am (the mask)
+	ar, am := mpcObj.BeaverPartitionVec(a)
+
+	// Synchronize all parties to ensure that ar and am have been distributed.
+	mpcObj.AssertSync()
+
+	pid := mpcObj.GetPid()
+
+	// Now you can start the timer (only one designated party starts it)
+	var startTime time.Time
+	if pid == 1 {
+		startTime = time.Now() // Use assignment, not redeclaration.
+		fmt.Printf("Timer started at: %v\n", startTime)
+	}
+
+	// Proceed with computing sin and cos using the Beaver method.
+	sin := mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+	cos := mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+	for i := range sin {
+		sin[i], cos[i] = mpcObj.BeaverSinCos(ar[i], am[i])
+	}
+
+	if pid == 1 {
+		endTime := time.Now()
+		elapsed := endTime.Sub(startTime)
+		fmt.Printf("SSTrigVec computation took: %v\n", elapsed)
+	}
+
+	return sin, cos
+}
+
+func (mpcObj *MPC) SSTrigVecRepeated(a mpc_core.RVec, iterations int) (mpc_core.RVec, mpc_core.RVec, time.Duration) {
+	// Partition the vector into ar (the masked part) and am (the mask)
+	ar, am := mpcObj.BeaverPartitionVec(a)
+	// Synchronize all parties so that shares are distributed.
+	mpcObj.AssertSync()
+
+	var totalElapsed time.Duration
+	var sin, cos mpc_core.RVec
+
+	// Loop for the desired number of iterations.
+	for i := 0; i < iterations; i++ {
+		// (Optionally, re-partition and sync for each iteration if needed)
+		mpcObj.AssertSync() // Ensure all parties are ready for this iteration
+
+		startTime := time.Now()
+		// Compute sin and cos using the Beaver method.
+		sin = mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+		cos = mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+		for j := range sin {
+			sin[j], cos[j] = mpcObj.BeaverSinCos(ar[j], am[j])
+		}
+		// Synchronize again if you need to ensure everyone finished.
+		mpcObj.AssertSync()
+
+		totalElapsed += time.Since(startTime)
+	}
+
+	// Return the final computed values and the average elapsed time.
+	avgElapsed := totalElapsed / time.Duration(iterations)
+	return sin, cos, avgElapsed
+}
+
+// func (mpcObj *MPC) SSTrigVec(a mpc_core.RVec) (mpc_core.RVec, mpc_core.RVec) {
+// 	// Partition the vector into ar (the masked part) and am (the mask)
+// 	ar, am := mpcObj.BeaverPartitionVec(a)
+
+// 	// Synchronize all parties to ensure that ar and am have been distributed.
+// 	// This barrier call will block until every party has reached this point.
+// 	mpcObj.AssertSync()
+
+// 	pid := mpcObj.GetPid()
+
+// 	// Now you can start the timer (e.g., only one designated party starts it)
+// 	var startTime time.Time
+// 	if pid == 1 { // or whichever party is designated to start the timer
+// 		startTime := time.Now()
+// 		fmt.Printf("Timer started at: %v\n", startTime)
+// 		// Optionally, store or propagate this startTime if needed for later calculations.
+// 	}
+
+// 	// Proceed with computing sin and cos using the Beaver method.
+// 	sin := mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+// 	cos := mpc_core.InitRVec(mpcObj.rtype.Zero(), len(a))
+// 	for i := range sin {
+// 		sin[i], cos[i] = mpcObj.BeaverSinCos(ar[i], am[i])
+// 	}
+
+// 	if pid == 1 {
+// 		endTime := time.Now()
+// 		elapsed := endTime.Sub(startTime)
+// 		fmt.Printf("SSTrigVec computation took: %v\n", elapsed)
+// 	}
+
+// 	return sin, cos
+// }
+
+func (mpcObj *MPC) SSMultElem(a, b mpc_core.RElem) mpc_core.RElem {
+	ar, am := mpcObj.BeaverPartition(a)
+	br, bm := mpcObj.BeaverPartition(b)
+	x := mpcObj.BeaverMult(ar, am, br, bm)
+	return mpcObj.BeaverReconstruct(x)
+}
 
 func (mpcObj *MPC) SSMultMat(a, b mpc_core.RMat) mpc_core.RMat {
 	ar, am := mpcObj.BeaverPartitionMat(a)

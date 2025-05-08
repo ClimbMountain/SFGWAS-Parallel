@@ -1,0 +1,39 @@
+error
+W : constants.go:17 (lib.init.0)             - Couldn't parse CONN_TIMEOUT, using default value:  10m0s
+panic: listen tcp 0.0.0.0:8062: bind: address already in use
+
+goroutine 23 [running]:
+github.com/hhcho/sfgwas-private/mpc.checkError(...)
+	/Users/kylesheng/sfgwas/mpc/utilities.go:20
+github.com/hhcho/sfgwas-private/mpc.OpenChannel({0x140000d4820?, 0x140000afef0?}, {0x140001a406c, 0x4})
+	/Users/kylesheng/sfgwas/mpc/netconnect.go:276 +0x104
+github.com/hhcho/sfgwas-private/mpc.initNetworkForThread({0x140000d4820, 0x7}, 0x140000afda0, 0x1, 0x3, 0x2)
+	/Users/kylesheng/sfgwas/mpc/netconnect.go:191 +0x45c
+github.com/hhcho/sfgwas-private/mpc.InitCommunication.func1(0x2)
+	/Users/kylesheng/sfgwas/mpc/netconnect.go:142 +0x84
+created by github.com/hhcho/sfgwas-private/mpc.InitCommunication in goroutine 1
+	/Users/kylesheng/sfgwas/mpc/netconnect.go:138 +0xec
+exit status 2
+W : constants.go:17 (lib.init.0)             - Couldn't parse CONN_TIMEOUT, using default value:  10m0s
+panic: write tcp 127.0.0.1:62712->127.0.0.1:8060: write: broken pipe
+
+goroutine 1 [running]:
+github.com/hhcho/sfgwas-private/mpc.WriteFull(0x14000193b40, {0x140009b2ad0, 0x4, 0x4})
+	/Users/kylesheng/sfgwas/mpc/netconnect.go:250 +0xd0
+github.com/hhcho/sfgwas-private/mpc.(*Network).SendRData(0x14000322070, {0x102301c00, 0x140000ac318}, 0x1)
+	/Users/kylesheng/sfgwas/mpc/sendrecieve.go:195 +0xbc
+github.com/hhcho/sfgwas-private/mpc.(*MPC).RevealSymMat(0x14000324480, {0x140000ac168, 0x1, 0x1})
+	/Users/kylesheng/sfgwas/mpc/mpc.go:417 +0x184
+github.com/hhcho/sfgwas-private/mpc.(*MPC).BeaverPartitionMat(0x14000324480, {0x14000193d50, 0x1, 0x1})
+	/Users/kylesheng/sfgwas/mpc/beavermult.go:67 +0x1b0
+github.com/hhcho/sfgwas-private/mpc.(*MPC).BeaverPartitionVec(...)
+	/Users/kylesheng/sfgwas/mpc/beavermult.go:15
+github.com/hhcho/sfgwas-private/mpc.(*MPC).SSTrigVec(0x14000324480, {0x14000280708?, 0x64, 0x64?})
+	/Users/kylesheng/sfgwas/mpc/ss.go:39 +0x50
+main.RunSinGraph()
+	/Users/kylesheng/sfgwas/sfgwas.go:106 +0x2ac
+main.main()
+	/Users/kylesheng/sfgwas/sfgwas.go:27 +0x1c
+exit status 2
+W : constants.go:17 (lib.init.0)             - Couldn't parse CONN_TIMEOUT, using default value:  10m0s
+./run_example.sh: line 8: 65643 Killed: 9               PID=$i go run sfgwas.go

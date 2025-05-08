@@ -30,7 +30,7 @@ func MarshalRData(val interface{}) []byte {
 
 //Wrappers for marshaling functions defined in crypto
 
-//MarshalCV returns bytes for ct sizes and bytes for each chiphertext: 8 bytes used //TODO: check if 4 bytes are enough
+// MarshalCV returns bytes for ct sizes and bytes for each chiphertext: 8 bytes used //TODO: check if 4 bytes are enough
 func MarshalCV(cv crypto.CipherVector) ([]byte, []byte) {
 	cvBytes, ctSizes, err := cv.MarshalBinary()
 
@@ -53,7 +53,7 @@ func MarshalCV(cv crypto.CipherVector) ([]byte, []byte) {
 
 }
 
-//UnmarshalCipherVector updates cv to have the correct ciphertexts (cv must have the corrext size)
+// UnmarshalCipherVector updates cv to have the correct ciphertexts (cv must have the corrext size)
 func UnmarshalCV(cryptoParams *crypto.CryptoParams, ncts int, sbytes, ctbytes []byte) crypto.CipherVector {
 
 	intsize := uint64(8)

@@ -1,0 +1,29 @@
+Initializing network for thread:  3
+Initializing network for thread:  1
+Opening socket on:  0.0.0.0:8021
+Initializing network for thread:  0
+Opening socket on:  0.0.0.0:8020
+Initializing network for thread:  2
+Opening socket on:  0.0.0.0:8022
+Opening socket on:  0.0.0.0:8023
+Successfully opened channel at port 8022
+Check port: opened and listening to party 1
+Opening socket on:  0.0.0.0:8042
+Successfully opened channel at port 8023
+Check port: opened and listening to party 1
+Opening socket on:  0.0.0.0:8043
+Successfully opened channel at port 8020
+Check port: opened and listening to party 1
+Successfully opened channel at port 8021
+Opening socket on:  0.0.0.0:8040
+Check port: opened and listening to party 1
+Opening socket on:  0.0.0.0:8041
+Successfully opened channel at port 8043
+Successfully opened channel at port 8040
+Check port: opened and listening to party 2
+Check port: opened and listening to party 2
+Network for thread 3 complete. Successfully opened channel at port 8042
+Network for thread 0 complete. Check port: opened and listening to party 2
+Network for thread 2 complete. Successfully opened channel at port 8041
+Check port: opened and listening to party 2
+Network for thread 1 complete. 1!: gwas.go:193 (gwas.InitializeGWASProtocol) - MPC parameters: bit length 256, data bits 60, frac bits 30

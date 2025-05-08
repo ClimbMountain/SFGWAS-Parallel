@@ -1,0 +1,30 @@
+Initializing network for thread:  3
+Initializing network for thread:  0
+Initializing network for thread:  1
+Initializing network for thread:  2
+Connection failed. Error: dial tcp 127.0.0.1:8041: connect: connection refused
+Retrying in... 5s
+Connection failed. Error: dial tcp 127.0.0.1:8040: connect: connection refused
+Retrying in... 5s
+Connection failed. Error: dial tcp 127.0.0.1:8043: connect: connection refused
+Retrying in... 5s
+Connection failed. Error: dial tcp 127.0.0.1:8042: connect: connection refused
+Retrying in... 5s
+Successfully connected to 127.0.0.1:8040
+Successfully connected to 127.0.0.1:8043
+Connected to socket, listening to party 0
+Connected to socket, listening to party 0
+Successfully connected to 127.0.0.1:8042
+Connected to socket, listening to party 0
+Successfully connected to 127.0.0.1:8041
+Connected to socket, listening to party 0
+Successfully connected to 127.0.0.1:8062
+Connected to socket, listening to party 1
+Network for thread 2 complete. Successfully connected to 127.0.0.1:8061
+Connected to socket, listening to party 1
+Network for thread 1 complete. Successfully connected to 127.0.0.1:8063
+Connected to socket, listening to party 1
+Network for thread 3 complete. Successfully connected to 127.0.0.1:8060
+Connected to socket, listening to party 1
+Network for thread 0 complete. 1!: gwas.go:193 (gwas.InitializeGWASProtocol) - MPC parameters: bit length 256, data bits 60, frac bits 30
+1!: gwas.go:265 (gwas.InitializeGWASProtocol) - 2024-07-03T09:51:57-04:00 First few SNP positions: [1000010000 1000020000 1000030000 1000040000 1000050000]
